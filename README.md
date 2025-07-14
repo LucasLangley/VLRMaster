@@ -103,18 +103,27 @@ MAX_CONSECUTIVE_FAILURES=10
 
 ## 📦 Scripts
 
+### Desenvolvimento
 ```bash
-# Desenvolvimento
-npm run dev
+npm start                 # Executa o app em modo produção
+npm run dev              # Executa em modo desenvolvimento
+npm run react-dev        # Executa apenas o React (desenvolvimento web)
+```
 
-# Build para produção
-npm run build
+### Build e Deploy
+```bash
+npm run build            # Gera build de produção (Electron)
+npm run build:web        # Gera build para web (Netlify)
+npm run pack             # Empacota o app para distribuição
+npm run dist             # Gera build e empacota
+npm run deploy           # Build otimizado para deploy web
+```
 
-# Executar versão de produção
-npm run electron-prod
-
-# Compilar para Electron
-npm run electron-pack
+### Segurança
+```bash
+npm run security-check   # Verifica arquivos sensíveis e padrões de segurança
+npm run pre-commit       # Executa verificações antes do commit
+npm run safe-commit      # Commit seguro com verificações automáticas
 ```
 
 ## 🔧 Estrutura do Projeto

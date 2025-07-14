@@ -9,8 +9,13 @@
     "electron-dev": "cross-env NODE_ENV=development nodemon --exec electron . --watch main.js",
     "react-dev": "webpack serve --mode development",
     "build": "webpack --mode production",
+    "build:web": "webpack --mode production",
     "pack": "electron-builder",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && electron-builder",
+    "deploy": "npm run build:web && echo 'Build completo! Faça upload da pasta build/ para o Netlify'",
+    "security-check": "node scripts/security-check.js",
+    "pre-commit": "npm run security-check && npm run build:web",
+    "safe-commit": "npm run pre-commit && git add . && git commit"
   },
   "keywords": [
     "valorant",
@@ -47,6 +52,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.14.0",
+    "react-router-dom": "^7.6.3",
     "styled-components": "^6.0.0",
     "systeminformation": "^5.18.0"
   },

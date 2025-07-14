@@ -135,15 +135,43 @@ userData/
 .env.local
 .env.production
 .env.development
+.env.staging
+.env.test
+.env.*.local
 *.key
 *.pem
 *.crt
+*.p12
+*.pfx
 api-keys.json
 secrets.json
+credentials.json
+auth.json
 
 # Arquivos de configuração privada
 src/config/api-keys.js
 src/config/secrets.js
+src/config/private-config.js
+src/config/riot-api.js
+src/config/valorant-api.js
+valorant-api-key.json
+riot-api-config.js
+game-api-credentials.json
+
+# Arquivos de autenticação
+auth/
+authentication/
+**/auth-config.js
+**/api-credentials.js
+
+# Tokens e sessões
+*.token
+session.json
+refresh-token.json
+
+# Arquivos de configuração do servidor
+server-config.json
+database-config.json
 
 # Arquivos de debug
 debug.log
@@ -155,12 +183,35 @@ crash.log
 /temp/
 *.tmp
 
-# Arquivos de dados do usuário
+# Dados de usuário e cache
 /userData/
 /userdata/
 /user-data/
+user-preferences.json
+user-settings.json
+player-stats.json
+valorant-cache/
+game-cache/
+*.cache
+user-config.json
+player-config.json
+game-settings.json
 
 # Arquivos de backup
 *.backup
 *.bak
-*.old 
+*.old
+backup/
+backups/
+*.tmp.json
+temp-stats.json
+temp-match-data.json
+
+# Arquivos de deploy
+.netlify/
+netlify.toml.backup
+build-production/
+build-staging/
+dist-production/
+deploy-config.json
+netlify-config.json 

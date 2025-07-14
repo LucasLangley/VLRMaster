@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MemoryRouter as Router } from 'react-router';
+import { BrowserRouter as Router } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
@@ -44,13 +44,26 @@ function App() {
   
   const [systemInfo, setSystemInfo] = useState(null);
   const [overlayVisible, setOverlayVisible] = useState(false);
+  const [isElectronApp, setIsElectronApp] = useState(false);
 
   useEffect(() => {
     const initializeServices = async () => {
       try {
-        if (window.electron) {
+        // Detectar se está rodando no Electron
+        const electronDetected = !!(window.electron || window.navigator.userAgent.includes('Electron'));
+        setIsElectronApp(electronDetected);
+        
+        if (electronDetected && window.electron) {
           const info = await window.electron.invoke('get-system-info');
           setSystemInfo(info);
+        } else {
+          // Dados mock para ambiente web
+          setSystemInfo({
+            platform: 'web',
+            arch: 'web',
+            memory: 'N/A',
+            cpu: 'N/A'
+          });
         }
         
         GameDetectionService.startDetection((status) => {
@@ -73,7 +86,7 @@ function App() {
 
   const toggleOverlay = () => {
     setOverlayVisible(!overlayVisible);
-    if (window.electron) {
+    if (isElectronApp && window.electron) {
       window.electron.invoke('toggle-overlay');
     }
   };
@@ -94,6 +107,25 @@ function App() {
             onToggleOverlay={toggleOverlay}
             overlayVisible={overlayVisible}
           />
+          
+          {!isElectronApp && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                background: 'linear-gradient(90deg, #ff4655, #ff6b47)',
+                padding: '10px 20px',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              ⚠️ Versão Web: Algumas funcionalidades (overlay, detecção de processos) são limitadas. 
+              <a href="#" style={{ color: '#fff', textDecoration: 'underline', marginLeft: '10px' }}>
+                Baixe o app desktop para experiência completa
+              </a>
+            </motion.div>
+          )}
           
           <ContentArea>
             <AppRoutes gameStatus={gameStatus} systemInfo={systemInfo} />
