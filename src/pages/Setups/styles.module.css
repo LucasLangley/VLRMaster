@@ -1,0 +1,65 @@
+.setups {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: var(--primary-red);
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.filterSection {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.searchBox input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid rgba(255, 70, 85, 0.3);
+  border-radius: 8px;
+  background: rgba(26, 30, 35, 0.8);
+  color: white;
+  font-size: 0.875rem;
+}
+
+.mapsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mapCard {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mapCard:hover {
+  border-color: var(--primary-red);
+  transform: translateY(-2px);
+}
+

@@ -1,0 +1,69 @@
+.settings {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: var(--primary-red);
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .settingsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.sidebar {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+  height: fit-content;
+}
+
+.content {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+.navItem:hover {
+  background: rgba(255, 70, 85, 0.1);
+}
+
+.navItem.active {
+  background: var(--primary-red);
+  color: white;
+}
+

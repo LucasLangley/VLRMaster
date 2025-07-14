@@ -1,0 +1,50 @@
+.overlay {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: var(--primary-red);
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.overlayGrid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .overlayGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.previewArea {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+  position: relative;
+  min-height: 500px;
+}
+
+.configPanel {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+  height: fit-content;
+} 

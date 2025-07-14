@@ -1,0 +1,57 @@
+.analytics {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: var(--primary-red);
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.filterSection {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+}
+
+.chartSection {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+  margin-bottom: 2rem;
+}
+
+.matchHistory {
+  background: rgba(26, 30, 35, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 70, 85, 0.1);
+}
+
