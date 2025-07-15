@@ -12,7 +12,9 @@ import {
   X,
   Import,
   Download,
-  Upload
+  Upload,
+  Link,
+  Unlink
 } from 'lucide-react';
 import { ValorantAPI } from '../../services/ValorantAPI';
 
@@ -414,7 +416,7 @@ const Slider = styled.input`
     background: var(--primary-red);
     border-radius: 50%;
     cursor: pointer;
-    border: none;
+        border: none;
   }
 `;
 
@@ -463,21 +465,21 @@ const ActionButtons = styled.div`
 
 const CodeImportSection = styled.div`
   .import-input {
-    width: 100%;
-    padding: 1rem;
+  width: 100%;
+  padding: 1rem;
     background: rgba(15, 20, 25, 0.8);
     border: 1px solid rgba(255, 70, 85, 0.2);
-    border-radius: 8px;
-    color: #fff;
-    font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
     resize: vertical;
-    
-    &:focus {
-      outline: none;
-      border-color: var(--primary-red);
-    }
+  
+  &:focus {
+    outline: none;
+    border-color: var(--primary-red);
+  }
   }
 `;
 
@@ -534,6 +536,55 @@ const ToggleSwitch = styled.div`
   }
 `;
 
+const LinkButton = styled.button`
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 70, 85, 0.3);
+  border-radius: 4px;
+  background: ${props => props.linked ? 'rgba(255, 70, 85, 0.2)' : 'rgba(255, 255, 255, 0.05)'};
+  color: ${props => props.linked ? 'var(--primary-red)' : '#888'};
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: ${props => props.linked ? 'rgba(255, 70, 85, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
+    color: ${props => props.linked ? 'var(--primary-red)' : '#ccc'};
+  }
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const LengthControlsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  .length-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+    }
+  }
+  
+  .link-container {
+    display: flex;
+    justify-content: center;
+    margin: 0.25rem 0;
+  }
+`;
+
 function Crosshairs() {
   const [crosshairConfig, setCrosshairConfig] = useState({
     color: '#FFFFFF',
@@ -582,6 +633,8 @@ function Crosshairs() {
   const [activeTab, setActiveTab] = useState('visual');
   const [codeInput, setCodeInput] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const [innerLinesLinked, setInnerLinesLinked] = useState(false);
+  const [outerLinesLinked, setOuterLinesLinked] = useState(false);
 
   const updateConfig = (path, value) => {
     setCrosshairConfig(prev => {
@@ -596,6 +649,40 @@ function Crosshairs() {
       current[keys[keys.length - 1]] = value;
       return newConfig;
     });
+  };
+
+  const handleInnerLengthChange = (type, value) => {
+    if (innerLinesLinked) {
+      updateConfig('innerLines.length', value);
+      updateConfig('innerLines.lengthVertical', value);
+    } else {
+      updateConfig(`innerLines.${type}`, value);
+    }
+  };
+
+  const handleOuterLengthChange = (type, value) => {
+    if (outerLinesLinked) {
+      updateConfig('outerLines.length', value);
+      updateConfig('outerLines.lengthVertical', value);
+    } else {
+      updateConfig(`outerLines.${type}`, value);
+    }
+  };
+
+  const toggleInnerLinesLink = () => {
+    setInnerLinesLinked(!innerLinesLinked);
+    if (!innerLinesLinked) {
+      // Quando conecta, sincroniza o valor vertical com o horizontal
+      updateConfig('innerLines.lengthVertical', crosshairConfig.innerLines.length);
+    }
+  };
+
+  const toggleOuterLinesLink = () => {
+    setOuterLinesLinked(!outerLinesLinked);
+    if (!outerLinesLinked) {
+      // Quando conecta, sincroniza o valor vertical com o horizontal
+      updateConfig('outerLines.lengthVertical', crosshairConfig.outerLines.length);
+    }
   };
 
   const generateCode = () => {
@@ -753,19 +840,6 @@ function Crosshairs() {
                   {crosshairConfig.showOutline && (
                     <>
                       <ConfigRow>
-                        <label>Cor do Contorno</label>
-                        <ColorPicker>
-                          <input
-                            type="color"
-                            value={crosshairConfig.outlineColor}
-                            onChange={(e) => updateConfig('outlineColor', e.target.value)}
-                            className="color-input"
-                          />
-                          <span className="color-hex">{crosshairConfig.outlineColor}</span>
-                        </ColorPicker>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
                         <label>Opacidade de Contorno</label>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <Slider
@@ -843,7 +917,7 @@ function Crosshairs() {
                         </div>
                       </ConfigRow>
                     </>
-                                    )}
+                  )}
                 </ConfigSection>
 
                 <ConfigSection>
@@ -900,17 +974,39 @@ function Crosshairs() {
                       
                       <ConfigRow>
                         <label>Comprimento da Linha Interna</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="0"
-                            max="20"
-                            step="1"
-                            value={crosshairConfig.innerLines.length}
-                            onChange={(e) => updateConfig('innerLines.length', parseInt(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.innerLines.length}</span>
-                        </div>
+                        <LengthControlsContainer>
+                          <div className="length-row">
+                            <div className="slider-container">
+                              <Slider
+                                type="range"
+                                min="0"
+                                max="20"
+                                step="1"
+                                value={crosshairConfig.innerLines.length}
+                                onChange={(e) => handleInnerLengthChange('length', parseInt(e.target.value))}
+                              />
+                              <span className="value-display">{crosshairConfig.innerLines.length}</span>
+                            </div>
+                          </div>
+                          <div className="link-container">
+                            <LinkButton linked={innerLinesLinked} onClick={toggleInnerLinesLink}>
+                              {innerLinesLinked ? <Link /> : <Unlink />}
+                            </LinkButton>
+                          </div>
+                          <div className="length-row">
+                            <div className="slider-container">
+                              <Slider
+                                type="range"
+                                min="0"
+                                max="20"
+                                step="1"
+                                value={crosshairConfig.innerLines.lengthVertical}
+                                onChange={(e) => handleInnerLengthChange('lengthVertical', parseInt(e.target.value))}
+                              />
+                              <span className="value-display">{crosshairConfig.innerLines.lengthVertical}</span>
+                            </div>
+                          </div>
+                        </LengthControlsContainer>
                       </ConfigRow>
                       
                       <ConfigRow>
@@ -1028,17 +1124,39 @@ function Crosshairs() {
                       
                       <ConfigRow>
                         <label>Comprimento da Linha Externa</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="0"
-                            max="20"
-                            step="1"
-                            value={crosshairConfig.outerLines.length}
-                            onChange={(e) => updateConfig('outerLines.length', parseInt(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.outerLines.length}</span>
-                        </div>
+                        <LengthControlsContainer>
+                          <div className="length-row">
+                            <div className="slider-container">
+                              <Slider
+                                type="range"
+                                min="0"
+                                max="20"
+                                step="1"
+                                value={crosshairConfig.outerLines.length}
+                                onChange={(e) => handleOuterLengthChange('length', parseInt(e.target.value))}
+                              />
+                              <span className="value-display">{crosshairConfig.outerLines.length}</span>
+                            </div>
+                          </div>
+                          <div className="link-container">
+                            <LinkButton linked={outerLinesLinked} onClick={toggleOuterLinesLink}>
+                              {outerLinesLinked ? <Link /> : <Unlink />}
+                            </LinkButton>
+                          </div>
+                          <div className="length-row">
+                            <div className="slider-container">
+                              <Slider
+                                type="range"
+                                min="0"
+                                max="20"
+                                step="1"
+                                value={crosshairConfig.outerLines.lengthVertical}
+                                onChange={(e) => handleOuterLengthChange('lengthVertical', parseInt(e.target.value))}
+                              />
+                              <span className="value-display">{crosshairConfig.outerLines.lengthVertical}</span>
+                            </div>
+                          </div>
+                        </LengthControlsContainer>
                       </ConfigRow>
                       
                       <ConfigRow>
@@ -1163,8 +1281,8 @@ function Crosshairs() {
                 Preview
               </h3>
             </PreviewHeader>
-            
-            <PreviewCanvas>
+
+                        <PreviewCanvas>
               <div className="reference-lines" />
               <CrosshairPreview {...crosshairConfig}>
                 <div className="center-dot" />
@@ -1175,20 +1293,20 @@ function Crosshairs() {
                     <div className="line horizontal-right" />
                     <div className="line vertical-top" />
                     <div className="line vertical-bottom" />
-                  </div>
-                )}
-                
+                </div>
+              )}
+              
                 {crosshairConfig.outerLines.show && (
                   <div className="outer-lines">
                     <div className="line horizontal-left" />
                     <div className="line horizontal-right" />
                     <div className="line vertical-top" />
                     <div className="line vertical-bottom" />
-                  </div>
-                )}
-              </CrosshairPreview>
+                </div>
+              )}
+            </CrosshairPreview>
             </PreviewCanvas>
-            
+
             <CodeSection>
               <h4>
                 <Code />

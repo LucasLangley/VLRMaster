@@ -380,7 +380,7 @@ class ValorantCrosshairCodec {
     
     // Cor personalizada
     if (config.bUseCustomColor) {
-      code.push('u');
+        code.push('u');
       code.push(this.bgraToHexCode(config.colorCustom));
     }
     
@@ -400,16 +400,16 @@ class ValorantCrosshairCodec {
     if (config.bDisplayCenterDot) {
       code.push('d');
       code.push('1');
-      
+    
       if (config.centerDotSize !== 1) {
-        code.push('z');
+      code.push('z');
         code.push(config.centerDotSize.toString());
-      }
-      
-      if (config.centerDotOpacity !== 1) {
-        code.push('a');
-        code.push(config.centerDotOpacity.toString());
-      }
+    }
+    
+    if (config.centerDotOpacity !== 1) {
+      code.push('a');
+      code.push(config.centerDotOpacity.toString());
+    }
     }
     
     // Inner lines
@@ -424,12 +424,12 @@ class ValorantCrosshairCodec {
     }
     
     if (config.innerLines.opacity !== 1) {
-      code.push('0a');
-      code.push(config.innerLines.opacity.toString());
+    code.push('0a');
+    code.push(config.innerLines.opacity.toString());
     }
     
     if (config.innerLines.bShowShootingError) {
-      code.push('0f');
+    code.push('0f');
       code.push('1');
     }
     
@@ -454,20 +454,20 @@ class ValorantCrosshairCodec {
       }
       
       if (config.outerLines.lineOffset !== 10) {
-        code.push('1o');
+      code.push('1o');
         code.push(config.outerLines.lineOffset.toString());
-      }
-      
+    }
+    
       if (config.outerLines.opacity !== 0.35) {
-        code.push('1a');
-        code.push(config.outerLines.opacity.toString());
-      }
-      
+      code.push('1a');
+      code.push(config.outerLines.opacity.toString());
+    }
+    
       if (config.outerLines.bShowShootingError) {
-        code.push('1f');
-        code.push('1');
-      }
-      
+      code.push('1f');
+      code.push('1');
+    }
+    
       if (config.outerLines.lineThickness !== 2) {
         code.push('1g');
         code.push(config.outerLines.lineThickness.toString());
