@@ -1,5 +1,6 @@
 import axios from 'axios';
 import API_CONFIG from '../config/api-config.js';
+import { ValorantCrosshairCodec } from './ValorantCrosshairCodec.js';
 
 class ValorantAPIService {
   constructor() {
@@ -412,57 +413,51 @@ class ValorantAPIService {
     };
   }
 
-  getCrosshairPresets() {
-    return [
-      {
-        id: 'default',
-        name: 'Padrão',
-        settings: {
-          color: '#00FF00',
-          outlineThickness: 1,
-          centerDot: true,
-          centerDotOpacity: 0.5,
-          innerLines: {
-            opacity: 1,
-            length: 4,
-            thickness: 2,
-            offset: 2
-          }
-        }
-      },
-      {
-        id: 'pro',
-        name: 'Pro Player',
-        settings: {
-          color: '#FFFFFF',
-          outlineThickness: 2,
-          centerDot: false,
-          innerLines: {
-            opacity: 0.8,
-            length: 6,
-            thickness: 1,
-            offset: 3
-          }
-        }
-      },
-      {
-        id: 'minimal',
-        name: 'Minimalista',
-        settings: {
-          color: '#FF0040',
-          outlineThickness: 0,
-          centerDot: true,
-          centerDotOpacity: 1,
-          innerLines: {
-            opacity: 0.6,
-            length: 2,
-            thickness: 1,
-            offset: 1
-          }
-        }
-      }
-    ];
+  // Método removido - presets de mira não são mais suportados
+
+  /**
+   * Decodifica um código de mira do Valorant
+   * @param {string} code - Código da mira
+   * @returns {Object} Configurações da mira
+   */
+  decodeCrosshairCode(code) {
+    try {
+      return ValorantCrosshairCodec.decodeCrosshair(code);
+    } catch (error) {
+      console.error('Erro ao decodificar código de mira:', error);
+      return null;
+    }
   }
+
+  /**
+   * Gera um código de mira do Valorant
+   * @param {Object} config - Configurações da mira
+   * @returns {string} Código da mira
+   */
+  generateCrosshairCode(config) {
+    try {
+      return ValorantCrosshairCodec.generateCrosshairCode(config);
+    } catch (error) {
+      console.error('Erro ao gerar código de mira:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Valida um código de mira do Valorant
+   * @param {string} code - Código da mira
+   * @returns {boolean} True se o código é válido
+   */
+  validateCrosshairCode(code) {
+    try {
+      ValorantCrosshairCodec.decodeCrosshair(code);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // Métodos de presets removidos - não são mais suportados
 
   getMapSetups(mapName) {
     const setups = {
