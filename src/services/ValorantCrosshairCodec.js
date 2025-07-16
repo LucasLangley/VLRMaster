@@ -91,7 +91,7 @@ class ValorantCrosshairCodec {
       bAllowVertScaling: false,
       lineOffset: 0,
       bShowMovementError: false,
-      bShowShootingError: false,
+      bShowShootingError: true,
       bShowMinError: true,
       opacity: 1,
       bShowLines: true,
@@ -376,112 +376,102 @@ class ValorantCrosshairCodec {
    */
   static generateCrosshairCode(previewConfig) {
     const config = this.previewToConfig(previewConfig);
-    let code = ['0', 's', '1', 'P'];
-    
-    // Cor personalizada
+    let code = ['0'];
     if (config.bUseCustomColor) {
-        code.push('u');
+      code.push('P');
+      code.push('u');
       code.push(this.bgraToHexCode(config.colorCustom));
+    } else {
+      code.push('c');
+      code.push(this.getColorIndex(config.color).toString());
+      code.push('P');
     }
-    
     // Outline
-    if (config.bHasOutline) {
-      code.push('h');
-      code.push('1');
-    }
-    
+    code.push('t');
+    code.push(config.outlineThickness.toString());
+    code.push('o');
+    code.push(config.outlineOpacity.toString());
     // Fade
     if (config.bFadeCrosshairWithFiringError) {
       code.push('f');
       code.push('1');
     }
-    
     // Center dot
     if (config.bDisplayCenterDot) {
       code.push('d');
       code.push('1');
-    
       if (config.centerDotSize !== 1) {
-      code.push('z');
+        code.push('z');
         code.push(config.centerDotSize.toString());
+      }
+      if (config.centerDotOpacity !== 1) {
+        code.push('a');
+        code.push(config.centerDotOpacity.toString());
+      }
     }
-    
-    if (config.centerDotOpacity !== 1) {
-      code.push('a');
-      code.push(config.centerDotOpacity.toString());
-    }
-    }
-    
     // Inner lines
-    if (config.innerLines.lineLength !== 3) {
+    if (config.innerLines.bShowLines) {
+      code.push('0b');
+      code.push('1');
+      code.push('0t');
+      code.push(config.innerLines.lineThickness.toString());
       code.push('0l');
       code.push(config.innerLines.lineLength.toString());
-    }
-    
-    if (config.innerLines.lineOffset !== 0) {
-      code.push('0o');
-      code.push(config.innerLines.lineOffset.toString());
-    }
-    
-    if (config.innerLines.opacity !== 1) {
-    code.push('0a');
-    code.push(config.innerLines.opacity.toString());
-    }
-    
-    if (config.innerLines.bShowShootingError) {
-    code.push('0f');
-      code.push('1');
-    }
-    
-    if (config.innerLines.lineThickness !== 2) {
-      code.push('0g');
-      code.push(config.innerLines.lineThickness.toString());
-    }
-    
-    if (config.innerLines.lineLengthVertical !== 6) {
       code.push('0v');
       code.push(config.innerLines.lineLengthVertical.toString());
+      code.push('0o');
+      code.push(config.innerLines.lineOffset.toString());
+      code.push('0a');
+      code.push(config.innerLines.opacity.toString());
+      if (config.innerLines.bShowShootingError) {
+        code.push('0g');
+        code.push('1');
+      }
+      if (config.innerLines.bShowMovementError) {
+        code.push('0m');
+        code.push('1');
+      }
+      code.push('0s');
+      code.push(config.innerLines.firingErrorScale.toString());
+      code.push('0e');
+      code.push(config.innerLines.movementErrorScale.toString());
+    } else {
+      code.push('0b');
+      code.push('0');
     }
-    
     // Outer lines
     if (config.outerLines.bShowLines) {
       code.push('1b');
       code.push('1');
-      
-      if (config.outerLines.lineLength !== 2) {
-        code.push('1l');
-        code.push(config.outerLines.lineLength.toString());
-      }
-      
-      if (config.outerLines.lineOffset !== 10) {
+      code.push('1t');
+      code.push(config.outerLines.lineThickness.toString());
+      code.push('1l');
+      code.push(config.outerLines.lineLength.toString());
+      code.push('1v');
+      code.push(config.outerLines.lineLengthVertical.toString());
       code.push('1o');
-        code.push(config.outerLines.lineOffset.toString());
-    }
-    
-      if (config.outerLines.opacity !== 0.35) {
+      code.push(config.outerLines.lineOffset.toString());
       code.push('1a');
       code.push(config.outerLines.opacity.toString());
-    }
-    
       if (config.outerLines.bShowShootingError) {
-      code.push('1f');
-      code.push('1');
-    }
-    
-      if (config.outerLines.lineThickness !== 2) {
         code.push('1g');
-        code.push(config.outerLines.lineThickness.toString());
+        code.push('1');
       }
-      
-      if (config.outerLines.lineLengthVertical !== 2) {
-        code.push('1v');
-        code.push(config.outerLines.lineLengthVertical.toString());
+      if (config.outerLines.bShowMovementError) {
+        code.push('1m');
+        code.push('1');
       }
+      code.push('1s');
+      code.push(config.outerLines.firingErrorScale.toString());
+      code.push('1e');
+      code.push(config.outerLines.movementErrorScale.toString());
     } else {
       code.push('1b');
       code.push('0');
     }
-    
+    // ADS custom crosshair
+    code.push('m');
+    code.push('1');
     return code.join(';');
   }
 
@@ -553,6 +543,18 @@ class ValorantCrosshairCodec {
       defaultColor.b === color.b && 
       defaultColor.a === color.a
     );
+  }
+
+  static getColorIndex(color) {
+    const keys = Object.keys(this.defaultColors);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const defaultColor = this.defaultColors[key];
+      if (defaultColor.r === color.r && defaultColor.g === color.g && defaultColor.b === color.b && defaultColor.a === color.a) {
+        return i;
+      }
+    }
+    return 0; // Default to white
   }
 }
 

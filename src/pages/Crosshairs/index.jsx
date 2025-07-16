@@ -109,7 +109,7 @@ const PreviewHeader = styled.div`
 const PreviewCanvas = styled.div`
   position: relative;
   width: 100%;
-  height: 350px;
+  height: 250px;
   background: 
     linear-gradient(135deg, #1a1e24 0%, #0f1419 100%),
     radial-gradient(circle at 50% 50%, rgba(255, 70, 85, 0.03) 0%, transparent 70%);
@@ -150,7 +150,9 @@ const PreviewCanvas = styled.div`
   }
 `;
 
-const CrosshairPreview = styled.div`
+const CrosshairPreview = styled.div.attrs({
+  shouldForwardProp: (prop) => !['color', 'showOutline', 'outlineColor', 'outlineThickness', 'outlineOpacity', 'centerDot', 'centerDotSize', 'centerDotOpacity', 'innerLines', 'outerLines', 'fadeCrosshairWithFiringError'].includes(prop),
+})`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -162,14 +164,12 @@ const CrosshairPreview = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: ${props => props.centerDot ? `${props.centerDotSize * 2}px` : '0px'};
-    height: ${props => props.centerDot ? `${props.centerDotSize * 2}px` : '0px'};
+    width: ${props => (props.centerDot ? `${props.centerDotSize * 2 * scaleFactor}px` : '0px')};
+    height: ${props => (props.centerDot ? `${props.centerDotSize * 2 * scaleFactor}px` : '0px')};
     background: ${props => props.color};
     border-radius: 50%;
     opacity: ${props => props.centerDotOpacity || 0};
-    ${props => props.showOutline ? `
-      box-shadow: 0 0 0 ${props.outlineThickness}px ${props.outlineColor};
-    ` : ''}
+    ${props => props.showOutline ? `box-shadow: 0 0 0 ${props.outlineThickness * scaleFactor}px rgba(${parseInt(props.outlineColor.slice(1,3),16)}, ${parseInt(props.outlineColor.slice(3,5),16)}, ${parseInt(props.outlineColor.slice(5,7),16)}, ${props.outlineOpacity});` : ''}
   }
   
   .inner-lines {
@@ -177,45 +177,65 @@ const CrosshairPreview = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    opacity: ${props => {
+      if (props.fadeCrosshairWithFiringError && props.innerLines?.showShootingError) {
+        return props.innerLines.opacity * 0.5; // Simula fade reduzindo opacidade
+      }
+      return props.innerLines?.opacity || 1;
+    }};
     
     .line {
       position: absolute;
       background: ${props => props.color};
       opacity: ${props => props.innerLines?.opacity || 1};
-      ${props => props.showOutline ? `
-        box-shadow: 0 0 0 ${props.outlineThickness}px ${props.outlineColor};
-      ` : ''}
+      ${props => props.showOutline ? `box-shadow: 0 0 0 ${props.outlineThickness * scaleFactor}px rgba(${parseInt(props.outlineColor.slice(1,3),16)}, ${parseInt(props.outlineColor.slice(3,5),16)}, ${parseInt(props.outlineColor.slice(5,7),16)}, ${props.outlineOpacity});` : ''}
       
       &.horizontal-left {
         top: 50%;
-        right: ${props => (props.innerLines?.offset || 0)}px;
+        right: ${props => {
+          const baseOffset = (props.innerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.innerLines?.showShootingError) ? props.innerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(100%, -50%);
-        width: ${props => (props.innerLines?.length || 0)}px;
-        height: ${props => (props.innerLines?.thickness || 0)}px;
+        width: ${props => ((props.innerLines?.length || 0) * scaleFactor)}px;
+        height: ${props => ((props.innerLines?.thickness || 0) * scaleFactor)}px;
       }
       
       &.horizontal-right {
         top: 50%;
-        left: ${props => (props.innerLines?.offset || 0)}px;
+        left: ${props => {
+          const baseOffset = (props.innerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.innerLines?.showShootingError) ? props.innerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(-100%, -50%);
-        width: ${props => (props.innerLines?.length || 0)}px;
-        height: ${props => (props.innerLines?.thickness || 0)}px;
+        width: ${props => ((props.innerLines?.length || 0) * scaleFactor)}px;
+        height: ${props => ((props.innerLines?.thickness || 0) * scaleFactor)}px;
       }
       
       &.vertical-top {
         left: 50%;
-        bottom: ${props => (props.innerLines?.offset || 0)}px;
+        bottom: ${props => {
+          const baseOffset = (props.innerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.innerLines?.showShootingError) ? props.innerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(-50%, 100%);
-        width: ${props => (props.innerLines?.thickness || 0)}px;
-        height: ${props => (props.innerLines?.lengthVertical || props.innerLines?.length || 0)}px;
+        width: ${props => ((props.innerLines?.thickness || 0) * scaleFactor)}px;
+        height: ${props => ((props.innerLines?.lengthVertical || props.innerLines?.length || 0) * scaleFactor)}px;
       }
       
       &.vertical-bottom {
         left: 50%;
-        top: ${props => (props.innerLines?.offset || 0)}px;
+        top: ${props => {
+          const baseOffset = (props.innerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.innerLines?.showShootingError) ? props.innerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(-50%, -100%);
-        width: ${props => (props.innerLines?.thickness || 0)}px;
-        height: ${props => (props.innerLines?.lengthVertical || props.innerLines?.length || 0)}px;
+        width: ${props => ((props.innerLines?.thickness || 0) * scaleFactor)}px;
+        height: ${props => ((props.innerLines?.lengthVertical || props.innerLines?.length || 0) * scaleFactor)}px;
       }
     }
   }
@@ -225,45 +245,65 @@ const CrosshairPreview = styled.div`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    opacity: ${props => {
+      if (props.fadeCrosshairWithFiringError && props.outerLines?.showShootingError) {
+        return props.outerLines.opacity * 0.5; // Simula fade reduzindo opacidade
+      }
+      return props.outerLines?.opacity || 0.35;
+    }};
     
     .line {
       position: absolute;
       background: ${props => props.color};
       opacity: ${props => props.outerLines?.opacity || 0.35};
-      ${props => props.showOutline ? `
-        box-shadow: 0 0 0 ${props.outlineThickness}px ${props.outlineColor};
-      ` : ''}
+      ${props => props.showOutline ? `box-shadow: 0 0 0 ${props.outlineThickness * scaleFactor}px rgba(${parseInt(props.outlineColor.slice(1,3),16)}, ${parseInt(props.outlineColor.slice(3,5),16)}, ${parseInt(props.outlineColor.slice(5,7),16)}, ${props.outlineOpacity});` : ''}
       
       &.horizontal-left {
         top: 50%;
-        right: ${props => (props.outerLines?.offset || 0)}px;
+        right: ${props => {
+          const baseOffset = (props.outerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.outerLines?.showShootingError) ? props.outerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(100%, -50%);
-        width: ${props => (props.outerLines?.length || 0)}px;
-        height: ${props => (props.outerLines?.thickness || 0)}px;
+        width: ${props => ((props.outerLines?.length || 0) * scaleFactor)}px;
+        height: ${props => ((props.outerLines?.thickness || 0) * scaleFactor)}px;
       }
       
       &.horizontal-right {
         top: 50%;
-        left: ${props => (props.outerLines?.offset || 0)}px;
+        left: ${props => {
+          const baseOffset = (props.outerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.outerLines?.showShootingError) ? props.outerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(-100%, -50%);
-        width: ${props => (props.outerLines?.length || 0)}px;
-        height: ${props => (props.outerLines?.thickness || 0)}px;
+        width: ${props => ((props.outerLines?.length || 0) * scaleFactor)}px;
+        height: ${props => ((props.outerLines?.thickness || 0) * scaleFactor)}px;
       }
       
       &.vertical-top {
         left: 50%;
-        bottom: ${props => (props.outerLines?.offset || 0)}px;
+        bottom: ${props => {
+          const baseOffset = (props.outerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.outerLines?.showShootingError) ? props.outerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(-50%, 100%);
-        width: ${props => (props.outerLines?.thickness || 0)}px;
-        height: ${props => (props.outerLines?.lengthVertical || props.outerLines?.length || 0)}px;
+        width: ${props => ((props.outerLines?.thickness || 0) * scaleFactor)}px;
+        height: ${props => ((props.outerLines?.lengthVertical || props.outerLines?.length || 0) * scaleFactor)}px;
       }
       
       &.vertical-bottom {
         left: 50%;
-        top: ${props => (props.outerLines?.offset || 0)}px;
+        top: ${props => {
+          const baseOffset = (props.outerLines?.offset || 0) * scaleFactor;
+          const firingOffset = (!props.fadeCrosshairWithFiringError && props.outerLines?.showShootingError) ? props.outerLines.firingErrorScale * 5 * scaleFactor : 0;
+          return `${baseOffset + firingOffset}px`;
+        }};
         transform: translate(-50%, -100%);
-        width: ${props => (props.outerLines?.thickness || 0)}px;
-        height: ${props => (props.outerLines?.lengthVertical || props.outerLines?.length || 0)}px;
+        width: ${props => ((props.outerLines?.thickness || 0) * scaleFactor)}px;
+        height: ${props => ((props.outerLines?.lengthVertical || props.outerLines?.length || 0) * scaleFactor)}px;
       }
     }
   }
@@ -321,33 +361,6 @@ const ConfigCard = styled.div`
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  }
-`;
-
-const TabContainer = styled.div`
-  display: flex;
-  border-bottom: 1px solid rgba(255, 70, 85, 0.2);
-  margin-bottom: 1.5rem;
-`;
-
-const Tab = styled.button`
-  flex: 1;
-  padding: 1rem;
-  border: none;
-  background: ${props => props.active ? 'rgba(255, 70, 85, 0.1)' : 'transparent'};
-  color: ${props => props.active ? 'var(--primary-red)' : '#aaa'};
-  border-bottom: 2px solid ${props => props.active ? 'var(--primary-red)' : 'transparent'};
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  
-  &:hover {
-    background: rgba(255, 70, 85, 0.1);
-    color: var(--primary-red);
   }
 `;
 
@@ -463,25 +476,7 @@ const ActionButtons = styled.div`
   margin-top: 2rem;
 `;
 
-const CodeImportSection = styled.div`
-  .import-input {
-  width: 100%;
-  padding: 1rem;
-    background: rgba(15, 20, 25, 0.8);
-    border: 1px solid rgba(255, 70, 85, 0.2);
-  border-radius: 8px;
-  color: #fff;
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-    resize: vertical;
-  
-  &:focus {
-    outline: none;
-    border-color: var(--primary-red);
-  }
-  }
-`;
+
 
 const ColorPicker = styled.div`
   display: flex;
@@ -585,6 +580,8 @@ const LengthControlsContainer = styled.div`
   }
 `;
 
+const scaleFactor = 1.5; // Ajustado para preview menor e proporcional
+
 function Crosshairs() {
   const [crosshairConfig, setCrosshairConfig] = useState({
     color: '#FFFFFF',
@@ -605,7 +602,7 @@ function Crosshairs() {
       offset: 0,
       opacity: 1,
       showMovementError: false,
-      showShootingError: false,
+      showShootingError: true,
       showMinError: true,
       movementErrorScale: 1,
       firingErrorScale: 1
@@ -630,7 +627,6 @@ function Crosshairs() {
     hideCrosshair: false
   });
 
-  const [activeTab, setActiveTab] = useState('visual');
   const [codeInput, setCodeInput] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
   const [innerLinesLinked, setInnerLinesLinked] = useState(false);
@@ -735,7 +731,7 @@ function Crosshairs() {
         offset: 0,
         opacity: 1,
         showMovementError: false,
-        showShootingError: false,
+        showShootingError: true,
         showMinError: true,
         movementErrorScale: 1,
         firingErrorScale: 1
@@ -786,32 +782,15 @@ function Crosshairs() {
               Configurações da Mira
             </h3>
 
-            <TabContainer>
-              <Tab 
-                active={activeTab === 'visual'} 
-                onClick={() => setActiveTab('visual')}
-              >
-                <Settings />
-                Configurações Visuais
-              </Tab>
-              <Tab 
-                active={activeTab === 'code'} 
-                onClick={() => setActiveTab('code')}
-              >
-                <Code />
-                Importar Código
-              </Tab>
-            </TabContainer>
-
-            {activeTab === 'visual' ? (
-              <div>
+            <div>
+                {/* SEÇÃO 1: RETÍCULA */}
                 <ConfigSection>
-                  <h4>Cor da Mira</h4>
-                  <div className="section-description">
-                    Configure a cor principal da mira
-                  </div>
+                  <h3 style={{ color: 'var(--primary-red)', fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                    RETÍCULA
+                  </h3>
+                  
                   <ConfigRow>
-                    <label>Cor Principal</label>
+                    <label>Cor da retícula</label>
                     <ColorPicker>
                       <input
                         type="color"
@@ -822,109 +801,83 @@ function Crosshairs() {
                       <span className="color-hex">{crosshairConfig.color}</span>
                     </ColorPicker>
                   </ConfigRow>
-                </ConfigSection>
 
-                <ConfigSection>
-                  <h4>Contorno</h4>
-                  <div className="section-description">
-                    Configure o contorno da mira
-                  </div>
                   <ConfigRow>
-                    <label>Mostrar Contorno</label>
+                    <label>Contornos</label>
                     <ToggleSwitch
                       checked={crosshairConfig.showOutline}
                       onClick={() => updateConfig('showOutline', !crosshairConfig.showOutline)}
                     />
                   </ConfigRow>
                   
-                  {crosshairConfig.showOutline && (
-                    <>
-                      <ConfigRow>
-                        <label>Opacidade de Contorno</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.1"
-                            value={crosshairConfig.outlineOpacity}
-                            onChange={(e) => updateConfig('outlineOpacity', parseFloat(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.outlineOpacity}</span>
-                        </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Espessura de Contorno</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="1"
-                            max="5"
-                            step="1"
-                            value={crosshairConfig.outlineThickness}
-                            onChange={(e) => updateConfig('outlineThickness', parseInt(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.outlineThickness}</span>
-                        </div>
-                      </ConfigRow>
-                    </>
-                  )}
-                </ConfigSection>
-
-                <ConfigSection>
-                  <h4>Ponto Central</h4>
-                  <div className="section-description">
-                    Configure o ponto central da mira
-                  </div>
                   <ConfigRow>
-                    <label>Ponto Central</label>
+                    <label>Opacidade de contorno</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.001"
+                        value={crosshairConfig.outlineOpacity}
+                        onChange={(e) => updateConfig('outlineOpacity', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.outlineOpacity}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Espessura de contorno</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="1"
+                        max="6"
+                        step="1"
+                        value={crosshairConfig.outlineThickness}
+                        onChange={(e) => updateConfig('outlineThickness', parseInt(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.outlineThickness}</span>
+                    </div>
+                  </ConfigRow>
+
+                  <ConfigRow>
+                    <label>Ponto central</label>
                     <ToggleSwitch
                       checked={crosshairConfig.centerDot}
                       onClick={() => updateConfig('centerDot', !crosshairConfig.centerDot)}
                     />
                   </ConfigRow>
                   
-                  {crosshairConfig.centerDot && (
-                    <>
-                      <ConfigRow>
-                        <label>Opacidade do Ponto Central</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.1"
-                            value={crosshairConfig.centerDotOpacity}
-                            onChange={(e) => updateConfig('centerDotOpacity', parseFloat(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.centerDotOpacity}</span>
-                        </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Espessura do Ponto Central</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="1"
-                            max="10"
-                            step="1"
-                            value={crosshairConfig.centerDotSize}
-                            onChange={(e) => updateConfig('centerDotSize', parseInt(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.centerDotSize}</span>
-                        </div>
-                      </ConfigRow>
-                    </>
-                  )}
-                </ConfigSection>
+                  <ConfigRow>
+                    <label>Opacidade do ponto central</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.001"
+                        value={crosshairConfig.centerDotOpacity}
+                        onChange={(e) => updateConfig('centerDotOpacity', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.centerDotOpacity}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Espessura do ponto central</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="1"
+                        max="6"
+                        step="1"
+                        value={crosshairConfig.centerDotSize}
+                        onChange={(e) => updateConfig('centerDotSize', parseInt(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.centerDotSize}</span>
+                    </div>
+                  </ConfigRow>
 
-                <ConfigSection>
-                  <h4>Configurações Avançadas</h4>
-                  <div className="section-description">
-                    Configurações especiais da mira
-                  </div>
                   <ConfigRow>
                     <label>Sobrepor o deslocamento de erro de disparo pelo deslocamento de retícula</label>
                     <ToggleSwitch
@@ -942,11 +895,12 @@ function Crosshairs() {
                   </ConfigRow>
                 </ConfigSection>
 
+                {/* SEÇÃO 2: LINHAS INTERNAS */}
                 <ConfigSection>
-                  <h4>Linhas Internas</h4>
-                  <div className="section-description">
-                    Configure as linhas principais da mira
-                  </div>
+                  <h3 style={{ color: 'var(--primary-red)', fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                    LINHAS INTERNAS
+                  </h3>
+                  
                   <ConfigRow>
                     <label>Exibir linhas internas</label>
                     <ToggleSwitch
@@ -955,321 +909,315 @@ function Crosshairs() {
                     />
                   </ConfigRow>
                   
-                  {crosshairConfig.innerLines.show && (
-                    <>
-                      <ConfigRow>
-                        <label>Opacidade da Linha Interna</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.1"
-                            value={crosshairConfig.innerLines.opacity}
-                            onChange={(e) => updateConfig('innerLines.opacity', parseFloat(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.innerLines.opacity}</span>
-                        </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Comprimento da Linha Interna</label>
-                        <LengthControlsContainer>
-                          <div className="length-row">
-                            <div className="slider-container">
-                              <Slider
-                                type="range"
-                                min="0"
-                                max="20"
-                                step="1"
-                                value={crosshairConfig.innerLines.length}
-                                onChange={(e) => handleInnerLengthChange('length', parseInt(e.target.value))}
-                              />
-                              <span className="value-display">{crosshairConfig.innerLines.length}</span>
-                            </div>
-                          </div>
-                          <div className="link-container">
-                            <LinkButton linked={innerLinesLinked} onClick={toggleInnerLinesLink}>
-                              {innerLinesLinked ? <Link /> : <Unlink />}
-                            </LinkButton>
-                          </div>
-                          <div className="length-row">
-                            <div className="slider-container">
-                              <Slider
-                                type="range"
-                                min="0"
-                                max="20"
-                                step="1"
-                                value={crosshairConfig.innerLines.lengthVertical}
-                                onChange={(e) => handleInnerLengthChange('lengthVertical', parseInt(e.target.value))}
-                              />
-                              <span className="value-display">{crosshairConfig.innerLines.lengthVertical}</span>
-                            </div>
-                          </div>
-                        </LengthControlsContainer>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Espessura da Linha Interna</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="1"
-                            max="10"
-                            step="1"
-                            value={crosshairConfig.innerLines.thickness}
-                            onChange={(e) => updateConfig('innerLines.thickness', parseInt(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.innerLines.thickness}</span>
-                        </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Deslocamento da Linha Interna</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ConfigRow>
+                    <label>Opacidade da linha interna</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.001"
+                        value={crosshairConfig.innerLines.opacity}
+                        onChange={(e) => updateConfig('innerLines.opacity', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.innerLines.opacity}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Comprimento da linha interna</label>
+                    <LengthControlsContainer>
+                      <div className="length-row">
+                        <div className="slider-container">
                           <Slider
                             type="range"
                             min="0"
                             max="20"
                             step="1"
-                            value={crosshairConfig.innerLines.offset}
-                            onChange={(e) => updateConfig('innerLines.offset', parseInt(e.target.value))}
+                            value={crosshairConfig.innerLines.length}
+                            onChange={(e) => handleInnerLengthChange('length', parseInt(e.target.value))}
                           />
-                          <span className="value-display">{crosshairConfig.innerLines.offset}</span>
+                          <span className="value-display">{crosshairConfig.innerLines.length}</span>
                         </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Erro de Movimento</label>
-                        <ToggleSwitch
-                          checked={crosshairConfig.innerLines.showMovementError}
-                          onClick={() => updateConfig('innerLines.showMovementError', !crosshairConfig.innerLines.showMovementError)}
-                        />
-                      </ConfigRow>
-                      
-                      {crosshairConfig.innerLines.showMovementError && (
-                        <ConfigRow>
-                          <label>Multiplicador de Erro de Movimento</label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Slider
-                              type="range"
-                              min="0"
-                              max="3"
-                              step="0.1"
-                              value={crosshairConfig.innerLines.movementErrorScale}
-                              onChange={(e) => updateConfig('innerLines.movementErrorScale', parseFloat(e.target.value))}
-                            />
-                            <span className="value-display">{crosshairConfig.innerLines.movementErrorScale}</span>
-                          </div>
-                        </ConfigRow>
-                      )}
-                      
-                      <ConfigRow>
-                        <label>Erro de Disparo</label>
-                        <ToggleSwitch
-                          checked={crosshairConfig.innerLines.showShootingError}
-                          onClick={() => updateConfig('innerLines.showShootingError', !crosshairConfig.innerLines.showShootingError)}
-                        />
-                      </ConfigRow>
-                      
-                      {crosshairConfig.innerLines.showShootingError && (
-                        <ConfigRow>
-                          <label>Multiplicador de Erro de Disparo</label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Slider
-                              type="range"
-                              min="0"
-                              max="3"
-                              step="0.1"
-                              value={crosshairConfig.innerLines.firingErrorScale}
-                              onChange={(e) => updateConfig('innerLines.firingErrorScale', parseFloat(e.target.value))}
-                            />
-                            <span className="value-display">{crosshairConfig.innerLines.firingErrorScale}</span>
-                          </div>
-                        </ConfigRow>
-                      )}
-                    </>
-                  )}
+                      </div>
+                      <div className="link-container">
+                        <LinkButton linked={innerLinesLinked} onClick={toggleInnerLinesLink}>
+                          {innerLinesLinked ? <Link /> : <Unlink />}
+                        </LinkButton>
+                      </div>
+                      <div className="length-row">
+                        <div className="slider-container">
+                          <Slider
+                            type="range"
+                            min="0"
+                            max="20"
+                            step="1"
+                            value={crosshairConfig.innerLines.lengthVertical}
+                            onChange={(e) => handleInnerLengthChange('lengthVertical', parseInt(e.target.value))}
+                          />
+                          <span className="value-display">{crosshairConfig.innerLines.lengthVertical}</span>
+                        </div>
+                      </div>
+                    </LengthControlsContainer>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Espessura da linha interna</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="1"
+                        value={crosshairConfig.innerLines.thickness}
+                        onChange={(e) => updateConfig('innerLines.thickness', parseInt(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.innerLines.thickness}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Deslocamento da linha interna</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="20"
+                        step="1"
+                        value={crosshairConfig.innerLines.offset}
+                        onChange={(e) => updateConfig('innerLines.offset', parseInt(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.innerLines.offset}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Erro de movimento</label>
+                    <ToggleSwitch
+                      checked={crosshairConfig.innerLines.showMovementError}
+                      onClick={() => updateConfig('innerLines.showMovementError', !crosshairConfig.innerLines.showMovementError)}
+                    />
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Multiplicador de erro de movimento</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="3"
+                        step="0.001"
+                        value={crosshairConfig.innerLines.movementErrorScale}
+                        onChange={(e) => updateConfig('innerLines.movementErrorScale', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.innerLines.movementErrorScale}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Erro de disparo</label>
+                    <ToggleSwitch
+                      checked={crosshairConfig.innerLines.showShootingError}
+                      onClick={() => updateConfig('innerLines.showShootingError', !crosshairConfig.innerLines.showShootingError)}
+                    />
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Multiplicador de erro de disparo</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="3"
+                        step="0.001"
+                        value={crosshairConfig.innerLines.firingErrorScale}
+                        onChange={(e) => updateConfig('innerLines.firingErrorScale', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.innerLines.firingErrorScale}</span>
+                    </div>
+                  </ConfigRow>
                 </ConfigSection>
 
+                {/* SEÇÃO 3: LINHAS EXTERNAS */}
                 <ConfigSection>
-                  <h4>Linhas Externas</h4>
-                  <div className="section-description">
-                    Configure as linhas externas da mira
-                  </div>
+                  <h3 style={{ color: 'var(--primary-red)', fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                    LINHAS EXTERNAS
+                  </h3>
+                  
                   <ConfigRow>
-                    <label>Exibir Linhas Externas</label>
+                    <label>Exibir linhas externas</label>
                     <ToggleSwitch
                       checked={crosshairConfig.outerLines.show}
                       onClick={() => updateConfig('outerLines.show', !crosshairConfig.outerLines.show)}
                     />
                   </ConfigRow>
                   
-                  {crosshairConfig.outerLines.show && (
-                    <>
-                      <ConfigRow>
-                        <label>Opacidade da Linha Externa</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ConfigRow>
+                    <label>Opacidade da linha externa</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.001"
+                        value={crosshairConfig.outerLines.opacity}
+                        onChange={(e) => updateConfig('outerLines.opacity', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.outerLines.opacity}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Comprimento da linha externa</label>
+                    <LengthControlsContainer>
+                      <div className="length-row">
+                        <div className="slider-container">
                           <Slider
                             type="range"
                             min="0"
-                            max="1"
-                            step="0.1"
-                            value={crosshairConfig.outerLines.opacity}
-                            onChange={(e) => updateConfig('outerLines.opacity', parseFloat(e.target.value))}
-                          />
-                          <span className="value-display">{crosshairConfig.outerLines.opacity}</span>
-                        </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Comprimento da Linha Externa</label>
-                        <LengthControlsContainer>
-                          <div className="length-row">
-                            <div className="slider-container">
-                              <Slider
-                                type="range"
-                                min="0"
-                                max="20"
-                                step="1"
-                                value={crosshairConfig.outerLines.length}
-                                onChange={(e) => handleOuterLengthChange('length', parseInt(e.target.value))}
-                              />
-                              <span className="value-display">{crosshairConfig.outerLines.length}</span>
-                            </div>
-                          </div>
-                          <div className="link-container">
-                            <LinkButton linked={outerLinesLinked} onClick={toggleOuterLinesLink}>
-                              {outerLinesLinked ? <Link /> : <Unlink />}
-                            </LinkButton>
-                          </div>
-                          <div className="length-row">
-                            <div className="slider-container">
-                              <Slider
-                                type="range"
-                                min="0"
-                                max="20"
-                                step="1"
-                                value={crosshairConfig.outerLines.lengthVertical}
-                                onChange={(e) => handleOuterLengthChange('lengthVertical', parseInt(e.target.value))}
-                              />
-                              <span className="value-display">{crosshairConfig.outerLines.lengthVertical}</span>
-                            </div>
-                          </div>
-                        </LengthControlsContainer>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Espessura da Linha Externa</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <Slider
-                            type="range"
-                            min="1"
                             max="10"
                             step="1"
-                            value={crosshairConfig.outerLines.thickness}
-                            onChange={(e) => updateConfig('outerLines.thickness', parseInt(e.target.value))}
+                            value={crosshairConfig.outerLines.length}
+                            onChange={(e) => handleOuterLengthChange('length', parseInt(e.target.value))}
                           />
-                          <span className="value-display">{crosshairConfig.outerLines.thickness}</span>
+                          <span className="value-display">{crosshairConfig.outerLines.length}</span>
                         </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Deslocamento da Linha Externa</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      </div>
+                      <div className="link-container">
+                        <LinkButton linked={outerLinesLinked} onClick={toggleOuterLinesLink}>
+                          {outerLinesLinked ? <Link /> : <Unlink />}
+                        </LinkButton>
+                      </div>
+                      <div className="length-row">
+                        <div className="slider-container">
                           <Slider
                             type="range"
                             min="0"
-                            max="30"
+                            max="10"
                             step="1"
-                            value={crosshairConfig.outerLines.offset}
-                            onChange={(e) => updateConfig('outerLines.offset', parseInt(e.target.value))}
+                            value={crosshairConfig.outerLines.lengthVertical}
+                            onChange={(e) => handleOuterLengthChange('lengthVertical', parseInt(e.target.value))}
                           />
-                          <span className="value-display">{crosshairConfig.outerLines.offset}</span>
+                          <span className="value-display">{crosshairConfig.outerLines.lengthVertical}</span>
                         </div>
-                      </ConfigRow>
-                      
-                      <ConfigRow>
-                        <label>Erro de Movimento</label>
-                        <ToggleSwitch
-                          checked={crosshairConfig.outerLines.showMovementError}
-                          onClick={() => updateConfig('outerLines.showMovementError', !crosshairConfig.outerLines.showMovementError)}
-                        />
-                      </ConfigRow>
-                      
-                      {crosshairConfig.outerLines.showMovementError && (
-                        <ConfigRow>
-                          <label>Multiplicador de Erro de Movimento</label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Slider
-                              type="range"
-                              min="0"
-                              max="3"
-                              step="0.1"
-                              value={crosshairConfig.outerLines.movementErrorScale}
-                              onChange={(e) => updateConfig('outerLines.movementErrorScale', parseFloat(e.target.value))}
-                            />
-                            <span className="value-display">{crosshairConfig.outerLines.movementErrorScale}</span>
-                          </div>
-                        </ConfigRow>
-                      )}
-                      
-                      <ConfigRow>
-                        <label>Erro de Disparo</label>
-                        <ToggleSwitch
-                          checked={crosshairConfig.outerLines.showShootingError}
-                          onClick={() => updateConfig('outerLines.showShootingError', !crosshairConfig.outerLines.showShootingError)}
-                        />
-                      </ConfigRow>
-                      
-                      {crosshairConfig.outerLines.showShootingError && (
-                        <ConfigRow>
-                          <label>Multiplicador de Erro de Disparo</label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Slider
-                              type="range"
-                              min="0"
-                              max="3"
-                              step="0.1"
-                              value={crosshairConfig.outerLines.firingErrorScale}
-                              onChange={(e) => updateConfig('outerLines.firingErrorScale', parseFloat(e.target.value))}
-                            />
-                            <span className="value-display">{crosshairConfig.outerLines.firingErrorScale}</span>
-                          </div>
-                        </ConfigRow>
-                      )}
-                    </>
-                  )}
+                      </div>
+                    </LengthControlsContainer>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Espessura da linha externa</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="1"
+                        value={crosshairConfig.outerLines.thickness}
+                        onChange={(e) => updateConfig('outerLines.thickness', parseInt(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.outerLines.thickness}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Deslocamento da linha externa</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="40"
+                        step="1"
+                        value={crosshairConfig.outerLines.offset}
+                        onChange={(e) => updateConfig('outerLines.offset', parseInt(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.outerLines.offset}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Erro de movimento</label>
+                    <ToggleSwitch
+                      checked={crosshairConfig.outerLines.showMovementError}
+                      onClick={() => updateConfig('outerLines.showMovementError', !crosshairConfig.outerLines.showMovementError)}
+                    />
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Multiplicador de erro de movimento</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="3"
+                        step="0.001"
+                        value={crosshairConfig.outerLines.movementErrorScale}
+                        onChange={(e) => updateConfig('outerLines.movementErrorScale', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.outerLines.movementErrorScale}</span>
+                    </div>
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Erro de disparo</label>
+                    <ToggleSwitch
+                      checked={crosshairConfig.outerLines.showShootingError}
+                      onClick={() => updateConfig('outerLines.showShootingError', !crosshairConfig.outerLines.showShootingError)}
+                    />
+                  </ConfigRow>
+                  
+                  <ConfigRow>
+                    <label>Multiplicador de erro de disparo</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Slider
+                        type="range"
+                        min="0"
+                        max="3"
+                        step="0.001"
+                        value={crosshairConfig.outerLines.firingErrorScale}
+                        onChange={(e) => updateConfig('outerLines.firingErrorScale', parseFloat(e.target.value))}
+                      />
+                      <span className="value-display">{crosshairConfig.outerLines.firingErrorScale}</span>
+                    </div>
+                  </ConfigRow>
                 </ConfigSection>
 
-                <ActionButtons>
-                  <ActionButton onClick={resetConfig}>
-                    <RotateCcw />
-                    Resetar
-                  </ActionButton>
-                </ActionButtons>
+                <ConfigSection>
+                  <h4>Importar Código de Mira</h4>
+                  <div className="section-description">
+                    Cole o código da mira do Valorant para importar as configurações
+                  </div>
+                  <ConfigRow>
+                    <textarea
+                      className="import-input"
+                      value={codeInput}
+                      onChange={(e) => setCodeInput(e.target.value)}
+                      placeholder="Cole o código da mira aqui (ex: 0;s;1;P;u;000000FF;h;0;f;0;0l;3;0o;0;0a;1;0f;0;1b;0)"
+                      rows={4}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        border: '1px solid rgba(255, 70, 85, 0.2)',
+                        borderRadius: '8px',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        color: '#fff',
+                        fontSize: '0.875rem',
+                        fontFamily: 'monospace',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </ConfigRow>
+                  <ActionButtons>
+                    <ActionButton onClick={importFromCode} className="primary">
+                      <Import />
+                      Importar
+                    </ActionButton>
+                    <ActionButton onClick={resetConfig}>
+                      <RotateCcw />
+                      Resetar
+                    </ActionButton>
+                  </ActionButtons>
+                </ConfigSection>
               </div>
-            ) : (
-              <CodeImportSection>
-                <h4>Importar Código de Mira</h4>
-                <div className="section-description">
-                  Cole o código da mira do Valorant para importar as configurações
-                </div>
-                <textarea
-                  className="import-input"
-                  value={codeInput}
-                  onChange={(e) => setCodeInput(e.target.value)}
-                  placeholder="Cole o código da mira aqui (ex: 0;s;1;P;u;000000FF;h;0;f;0;0l;3;0o;0;0a;1;0f;0;1b;0)"
-                  rows={4}
-                />
-                <ActionButtons>
-                  <ActionButton onClick={importFromCode} className="primary">
-                    <Import />
-                    Importar
-                  </ActionButton>
-                </ActionButtons>
-              </CodeImportSection>
-            )}
           </ConfigCard>
         </ContentArea>
 
